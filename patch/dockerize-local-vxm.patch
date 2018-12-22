@@ -1,0 +1,85 @@
+From 83c72547c60777d045b625adc5841dfbb4ed8790 Mon Sep 17 00:00:00 2001
+From: patl <patl@vmware.com>
+Date: Thu, 20 Dec 2018 15:10:35 +0000
+Subject: [PATCH 2/2] dockerize local vxm
+
+---
+ .../main/resources/com/emc/mystic/manager/commons/db/DBJPAContext.xml | 4 ++--
+ .../src/main/resources/hibernate/hibernate.cfg.xml                    | 2 +-
+ .../src/main/resources/com/emc/mystic/manager/commons/mq/mqCommon.xml | 2 +-
+ .../mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml    | 4 ++--
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/com/emc/mystic/manager/commons/db/DBJPAContext.xml b/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/com/emc/mystic/manager/commons/db/DBJPAContext.xml
+index 158b47b..97cfc2f 100644
+--- a/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/com/emc/mystic/manager/commons/db/DBJPAContext.xml
++++ b/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/com/emc/mystic/manager/commons/db/DBJPAContext.xml
+@@ -17,7 +17,7 @@
+ 
+ 	<bean id="dataSource"
+             class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+-            <property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/mysticmanager" />
++            <property name="jdbcUrl" value="jdbc:postgresql://psql:5432/mysticmanager" />
+             <property name="driverClass" value="org.postgresql.Driver" />
+             <property name="user" value="postgres" />
+             <property name="maxPoolSize" value="10"/>
+@@ -31,7 +31,7 @@
+ 
+     <bean id="marvinDataSource"
+             class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+-        <property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/marvin" />
++        <property name="jdbcUrl" value="jdbc:postgresql://psql:5432/marvin" />
+         <property name="driverClass" value="org.postgresql.Driver" />
+         <property name="user" value="marvin" />
+         <property name="password" value="VMw@re123" />
+diff --git a/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/hibernate/hibernate.cfg.xml b/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/hibernate/hibernate.cfg.xml
+index 0aca5dc..268c9b4 100644
+--- a/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/hibernate/hibernate.cfg.xml
++++ b/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/hibernate/hibernate.cfg.xml
+@@ -5,7 +5,7 @@
+ <hibernate-configuration>
+     <session-factory name="mysticSession">
+         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+-        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/mysticmanager</property>
++        <property name="hibernate.connection.url">jdbc:postgresql://psql:5432/mysticmanager</property>
+         <property name="hibernate.connection.username">postgres</property>
+         <property name="hibernate.default_catalog">mysticmanager</property>
+         <property name="hibernate.default_schema">public</property>
+diff --git a/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.mq/src/main/resources/com/emc/mystic/manager/commons/mq/mqCommon.xml b/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.mq/src/main/resources/com/emc/mystic/manager/commons/mq/mqCommon.xml
+index 6127176..17a4f43 100755
+--- a/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.mq/src/main/resources/com/emc/mystic/manager/commons/mq/mqCommon.xml
++++ b/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.mq/src/main/resources/com/emc/mystic/manager/commons/mq/mqCommon.xml
+@@ -10,7 +10,7 @@
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+ 
+     <aop:aspectj-autoproxy/>
+-    <rabbit:connection-factory id="connectionFactory" host="127.0.0.1"/>
++    <rabbit:connection-factory id="connectionFactory" host="rabbitmq"/>
+     <rabbit:admin connection-factory="connectionFactory"/>
+ 
+     <rabbit:annotation-driven/>
+diff --git a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml
+index 57f7b8e..105073d 100644
+--- a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml
++++ b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml
+@@ -13,7 +13,7 @@
+ 
+ 	<bean id="dataSource"
+ 		  class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+-		<property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/mysticmanager" />
++		<property name="jdbcUrl" value="jdbc:postgresql://psql:5432/mysticmanager" />
+ 		<property name="driverClass" value="org.postgresql.Driver" />
+ 		<property name="user" value="postgres" />
+ 		<property name="maxPoolSize" value="20"/>
+@@ -26,7 +26,7 @@
+ 	</bean>
+ 	<bean id="springBatchDataSource"
+ 		  class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+-		<property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/spring_batch" />
++		<property name="jdbcUrl" value="jdbc:postgresql://psql:5432/spring_batch" />
+ 		<property name="driverClass" value="org.postgresql.Driver" />
+ 		<property name="user" value="postgres" />
+ 		<property name="maxPoolSize" value="20"/>
+-- 
+2.7.4
+

@@ -1,0 +1,22 @@
+version: '3'
+services:
+    web:
+        build: ./tomcat
+        ports:
+            - "8080:8080"
+        depends_on:
+            - psql
+            - rabbitmq
+        links:
+            - psql
+            - rabbitmq
+        volumes:
+            - /expansion/workspace/marvin/application/mystic.manager/mystic.manager.web/target/mystic.manager.web-4.7.100:/usr/local/tomcat/webapps/ROOT
+            - /etc/localtime:/etc/localtime:ro   
+    psql: 
+        build: ./psql
+        ports:
+            - "5432:5432"
+
+    rabbitmq:
+        build: ./rabbitmq

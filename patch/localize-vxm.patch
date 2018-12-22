@@ -1,0 +1,188 @@
+From ff7600f83ed52432e54da2d8801858b17434cea1 Mon Sep 17 00:00:00 2001
+From: patl <patl@vmware.com>
+Date: Tue, 18 Dec 2018 00:49:58 +0800
+Subject: [PATCH 1/2] localize vxmanager
+
+---
+ .../manager/operation/core/config/DBConfig.java    | 10 +++----
+ .../web/service/AuthorizationServiceImpl.java      | 16 ++++++++++
+ .../manager/web/service/LogBundleServiceImpl.java  |  2 +-
+ .../src/main/webapp/WEB-INF/DBJPAWebContext.xml    | 14 ++++++++-
+ .../src/main/webapp/WEB-INF/web.xml                |  7 +++++
+ .../src/main/webapp/WEB-INF/webSecurity.xml        |  2 +-
+ .../src/test/resources/log4j2.xml                  | 34 ++++++++++++++++++++++
+ 7 files changed, 77 insertions(+), 8 deletions(-)
+ create mode 100644 application/mystic.manager/mystic.manager.web/src/test/resources/log4j2.xml
+
+diff --git a/application/mystic.manager/mystic.manager.operation/src/main/java/com/emc/mystic/manager/operation/core/config/DBConfig.java b/application/mystic.manager/mystic.manager.operation/src/main/java/com/emc/mystic/manager/operation/core/config/DBConfig.java
+index 0743d22..542986e 100644
+--- a/application/mystic.manager/mystic.manager.operation/src/main/java/com/emc/mystic/manager/operation/core/config/DBConfig.java
++++ b/application/mystic.manager/mystic.manager.operation/src/main/java/com/emc/mystic/manager/operation/core/config/DBConfig.java
+@@ -9,9 +9,9 @@ import javax.sql.DataSource;
+ @Configuration
+ public class DBConfig {
+ 
+-    @Bean(name = "springBatchDataSource")
+-    public DataSource springBatchDataSource() {
+-        JndiDataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
+-        return dataSourceLookup.getDataSource("java:/comp/env/jdbc/SpringBatchDB");
+-    }
++//    @Bean(name = "springBatchDataSource")
++//    public DataSource springBatchDataSource() {
++//        JndiDataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
++//        return dataSourceLookup.getDataSource("java:/comp/env/jdbc/SpringBatchDB");
++//    }
+ }
+diff --git a/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/AuthorizationServiceImpl.java b/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/AuthorizationServiceImpl.java
+index 50ab420..28d332f 100755
+--- a/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/AuthorizationServiceImpl.java
++++ b/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/AuthorizationServiceImpl.java
+@@ -27,6 +27,9 @@ import com.emc.mystic.manager.commons.vmware.VimOperator;
+ import com.emc.mystic.manager.commons.vmware.service.VMwareService;
+ import com.emc.mystic.manager.web.webutil.RestException;
+ import com.vce.commons.core.model.account.HostAccount;
++import com.vce.commons.core.ssl.MarvinHostnameVerifier;
++import com.vce.commons.core.ssl.MarvinSSLConfigurer;
++import com.vce.commons.core.ssl.MarvinTrustManager;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ import org.springframework.beans.factory.InitializingBean;
+@@ -55,6 +58,13 @@ public class AuthorizationServiceImpl implements AuthorizationService, Initializ
+     @Autowired
+     private ManagementAccountDao managementAccountDao;
+ 
++
++    @Autowired
++    private MarvinHostnameVerifier marvinHostnameVerifier;
++
++    @Autowired
++    private MarvinTrustManager marvinTrustManager;
++
+     @Override
+     public boolean addServiceAccount(String vcHost, String vcUser, String vcPassword, List<HostAccount> hostAccounts, String clusterMorValue){
+         logger.info("Add service account");
+@@ -151,6 +161,12 @@ public class AuthorizationServiceImpl implements AuthorizationService, Initializ
+     @Override
+     @Transactional
+     public void afterPropertiesSet() throws Exception {
++        try {
++            logger.info("Configuring Marvin SSL.");
++            MarvinSSLConfigurer.configureSSL(marvinHostnameVerifier, marvinTrustManager);
++        } catch (Exception e) {
++            logger.error("Failed to configuring Marvin SSL. {}", e);
++        }
+         if (settingsDao.count() == 0) {
+             logger.fatal("DB corrupt: no settings found");
+             System.exit(1);
+diff --git a/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/LogBundleServiceImpl.java b/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/LogBundleServiceImpl.java
+index 683dbdd..c144b89 100755
+--- a/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/LogBundleServiceImpl.java
++++ b/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/LogBundleServiceImpl.java
+@@ -232,7 +232,7 @@ public class LogBundleServiceImpl implements LogBundleService {
+         logger.info("Initialize data collection directory.");
+         File file = new File(DC_PATH);
+         if (!file.exists()) {
+-            if (!file.mkdir()) {
++            if (!file.mkdirs()) {
+                 logger.error("Failed to create data collection directory.");
+                 throw new RuntimeException("Failed to create data collection directory.");
+             }
+diff --git a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml
+index 7da3066..57f7b8e 100644
+--- a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml
++++ b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml
+@@ -24,7 +24,19 @@
+ 		<property name="preferredTestQuery" value="SELECT 1" />
+ 		<property name="testConnectionOnCheckout" value="true" />
+ 	</bean>
+-
++	<bean id="springBatchDataSource"
++		  class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
++		<property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/spring_batch" />
++		<property name="driverClass" value="org.postgresql.Driver" />
++		<property name="user" value="postgres" />
++		<property name="maxPoolSize" value="20"/>
++		<property name="minPoolSize" value="2" />
++		<property name="acquireIncrement" value="1" />
++		<property name="idleConnectionTestPeriod" value="3000" />
++		<property name="loginTimeout" value="300" />
++		<property name="preferredTestQuery" value="SELECT 1" />
++		<property name="testConnectionOnCheckout" value="true" />
++	</bean>
+ 	<bean id="entityManagerFactory"
+ 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+ 		<property name="packagesToScan" value="com.emc.mystic.manager.commons.db" />
+diff --git a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/web.xml b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/web.xml
+index 34d81a0..b2b0b36 100755
+--- a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/web.xml
++++ b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/web.xml
+@@ -70,6 +70,13 @@
+     <session-config>
+         <session-timeout>30</session-timeout>
+     </session-config>
++
++    <resource-ref>
++        <description>DB Connection</description>
++        <res-ref-name>jdbc/SpringBatchDB</res-ref-name>
++        <res-type>javax.sql.DataSource</res-type>
++        <res-auth>Container</res-auth>
++    </resource-ref>
+     <!--
+     <filter>
+         <filter-name>encodingFilter</filter-name>
+diff --git a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/webSecurity.xml b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/webSecurity.xml
+index b57cb58..742eb8a 100755
+--- a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/webSecurity.xml
++++ b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/webSecurity.xml
+@@ -174,7 +174,7 @@
+         <security:intercept-url pattern="/mystic/events/monitorClusterEvent" access="true" />
+         <security:intercept-url pattern="/mystic/**" access="hasAnyRole('VC', 'SDDC')" />
+         <!-- <security:intercept-url pattern="/mgmt/ui/**" access="hasAnyRole('VC', 'SDDC')" /> -->
+-        <security:intercept-url pattern="/**" access="true" requires-channel="https"/>
++        <security:intercept-url pattern="/**" access="true" requires-channel="http"/>
+ 
+         <security:anonymous />
+         <security:logout logout-url="/mystic/logout" logout-success-url="/mystic/logoutSuccess" />
+diff --git a/application/mystic.manager/mystic.manager.web/src/test/resources/log4j2.xml b/application/mystic.manager/mystic.manager.web/src/test/resources/log4j2.xml
+new file mode 100644
+index 0000000..6dda0fd
+--- /dev/null
++++ b/application/mystic.manager/mystic.manager.web/src/test/resources/log4j2.xml
+@@ -0,0 +1,34 @@
++<?xml version="1.0" encoding="UTF-8"?>
++
++<Configuration status="warn" monitorInterval="30">
++    <Properties>
++        <Property name="pattern">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %-5level [%thread] %logger{36} %class{1}.%method:%line - %msg%n</Property>
++    </Properties>
++
++    <Appenders>
++        <Console name="stdout" target="SYSTEM_OUT">
++            <PatternLayout pattern="${pattern}" />
++            <Filters>
++                <ThresholdFilter level="WARN" onMatch="DENY" onMismatch="ACCEPT"/>
++            </Filters>
++        </Console>
++
++        <Console name="stderr" target="SYSTEM_ERR">
++            <PatternLayout pattern="${pattern}" />
++            <Filters>
++                <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
++            </Filters>
++        </Console>
++    </Appenders>
++
++    <Loggers>
++        <Logger name="com.vce.lcm" level="trace" additivity="false">
++            <AppenderRef ref="stdout" />
++            <AppenderRef ref="stderr" />
++        </Logger>
++
++        <Root level="error">
++            <AppenderRef ref="stderr" />
++        </Root>
++    </Loggers>
++</Configuration>
+-- 
+2.7.4
+
