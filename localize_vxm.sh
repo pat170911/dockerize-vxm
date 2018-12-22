@@ -37,7 +37,7 @@ pg_hba="/application/mystic.manager/mystic.manager.commons/mystic.manager.common
 cp $path$pg_hba ./psql
 
 echo "apple git patch to dev code..."
-sudo cp ./patch/localize-vxm.patch ./patch/dockerize-local-vxm.patch $path
+cp ./patch/localize-vxm.patch ./patch/dockerize-local-vxm.patch $path
 OLDPWD=$PWD
 cd $path
 git apply localize-vxm.patch

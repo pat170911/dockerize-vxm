@@ -16,4 +16,5 @@ COPY runtime.properties /var/lib/vmware-marvin
 COPY ./ssl/ /etc/vmware-marvin/ssl
 COPY ./trust/ /var/lib/vmware-marvin/trust
 
-CMD ["catalina.sh", "run"]
+ENV JPDA_ADDRESS 5005
+CMD ["catalina.sh", "jpda", "run"]

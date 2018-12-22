@@ -1,15 +1,17 @@
-##dockerize your local vxm
-This environment could save your time from building your code to installing on the remote vxm.
-The script localize_vxm.sh back up your entire database copy some ssl file and apply git patch on your dev to prepare for the dockerization.
-Just run `source localize_vxm.sh` and follow the guide step by step, enter the vxm ip address, password and workspace path(or use the default).
-when finished, use the `docker-compse` to build up the env.
+## dockerize your local vxm
+This environment could help to deploy the vxm on your dev vm with docker saving time from building project to installed on the remote vxm.
+
+The script `localize_vxm.sh` back up your entire database copy some ssl file and apply git patch on your dev to prepare for the dockerization.
+Run the script below and follow the guide step by step, enter the vxm ip address, password and workspace path(or by default).
+```sh
+sudo source localize_vxm.sh
+```
+Then use the `docker-compse` to build up the env and DONE.
 ```sh
 docker-compose build
 docker-compose up
 ```
-DONE!
+
 Visit `http://localhost:8080` for your project.
-
-The tomcat container portforward `8080` to the outside.
-The psql container portforward `5432` to the outside.
-
+DEBUG port: 5005
+psql  port: 5432
