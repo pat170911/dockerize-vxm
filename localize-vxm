@@ -9,46 +9,40 @@ path=/home/mystic/workspace && marvin=/marvin
 # dependent package
 dep_pkg=("sshpass")
 
-error_exit()
-{
+error_exit() {
 	echo "Error: $1" 1>&2
 	exit 1
 }
 
-file_exist()
-{
+file_exist() {
 	if [ ! -f "$1" ]; then
 		error_exit "file $1 doesn't exist."
 	fi
 }
 
-command_status()
-{
+command_status() {
 	if [ "$1" != 0 ];then
 		error_exit "$2"
 	fi
 }
 
-usage()
-{
+usage() {
 	echo "Usage: $0 [-h host -p password | -i | -h]"
-	echo "       -a --address       IP address of the vxm host"
+	echo "       -h --host          IP address of the vxm host"
 	echo "       -p --password      Root password of the vmx host"
 	echo "       -i --interactive   Enter the interactive mode"
-	echo "       -h --help          Show help infomation"
+	echo "       --help             Show help infomation"
 	exit 1
 }
 
-check_permission()
-{
+check_permission() {
 	if [ $(id -u) != "0" ]; then
 		error_exit "no root privileges: Permission denied" 
 	fi
 }
 
 
-check_ip()
-{
+check_ip() {
 	if [ ! -n "$1" ]; then
 		error_exit "no IP entry."
 	fi
@@ -56,8 +50,7 @@ check_ip()
 	command_status "$?" "host $ip not found."
 }
 
-configure_files()
-{
+configure_files() {
 	cp -r ./trust ./ssl password.key runtime.properties ./tomcat && rm -rf ./trust ./ssl password.key runtime.properties
 	if [ -a ./psql/alldump.sql ]; then
 		cp -r ./psql/alldump.sql ./psql/alldump.sql.bak
@@ -71,8 +64,7 @@ configure_files()
 	command_status "$?" "fail to amend ./psql/alldump.sql, check it manually."
 }
 
-check_dev_path()
-{
+check_dev_path() {
 	echo -n "enter the path of your marvin project(default: /home/mystic/workspace) > "
 	read text
 	if [ "$text" != "" ]; then
@@ -87,12 +79,12 @@ check_dev_path()
 	fi
 
 	# replace workdir in docker-compose.yml
+	echo "configure docker file docker-compose.yml..."
 	sed -i "s|-\s.*/marvin|- ${path}/marvin|" docker-compose.yml # quiet stupid solution, how to match position in sed?
 	command_status "$?" "fail to replace the dev path in docker-compose.yml, check it manually."
 }
 
-apply_patch()
-{
+apply_patch() {
 	echo "apple git patch to dev code..."
 	cp ./patch/localize-vxm.patch ./patch/dockerize-local-vxm.patch $path$marvin
 	OLDPWD=$PWD
@@ -109,10 +101,9 @@ apply_patch()
 	cd $OLDPWD
 }
 
-install_dependency()
-{
+install_dependency() {
 	for pkg in $dep_pkg; do
-		dpkg -s "$package" &> /dev/null
+		dpkg -s "$pkg" &> /dev/null
 		if [ "$?" != 0 ]; then
 			echo "install dependent package $pkg..."
 			apt-get update &> /dev/null
@@ -121,8 +112,7 @@ install_dependency()
 	done
 }
 
-sshpass_mode()
-{
+sshpass_mode() {
 	check_permission
 
 	check_ip "$ip"
@@ -131,7 +121,7 @@ sshpass_mode()
 
 	echo "backup remote database..."
 	sshpass -p $password ssh root@$ip "pg_dumpall -U postgres > ~/alldump.sql" # may have synchronization problem.
-
+	sleep 2
 	echo "copy certificate files..."
 	sshpass -p $password scp -r root@$ip:'/var/lib/vmware-marvin/trust \
 						                  /etc/vmware-marvin/ssl \
@@ -150,8 +140,7 @@ sshpass_mode()
 	command_status "$?" "fail to sync the date, check it manually."
 }
 
-interact_mode()
-{
+interact_mode() {
 	check_permission
 
 	echo -n "enter the IP of vxm > "
@@ -188,7 +177,7 @@ interact_mode()
 
 while true; do
 	case "$1" in
-		-a | --address)		shift
+		-h | --host)		shift
 							ip="$1"
 							if [ -n "$password" ]; then
 								sshpass_mode
@@ -205,7 +194,7 @@ while true; do
 		-i | --interactive) interact_mode
 							break
 							;;
-		-h | --help)		usage
+		--help)				usage
 							;;
 		*)					usage
 							;;
@@ -217,9 +206,6 @@ done
 #pg_hba="/marvin/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/conf/pg_hba.conf"
 #file_exist "$path$pg_hba"
 #cp $path$pg_hba ./psql
-
-# replace workdir in docker-compose.yml
-sed -i "s|-\s.*/marvin|- ${path}/marvin|" docker-compose.yml # quiet stupid solution, how to match position in sed?
 
 echo "DONE"
 exit 0

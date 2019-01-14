@@ -3,7 +3,14 @@ FROM tomcat:8.5.35
 MAINTAINER pat
 
 # create folders
-RUN mkdir -m 755 /var/lib/vmware-marvin \
+RUN apt-get update \
+	&& apt-get install -y net-tools \
+	&& apt-get install -y dnsutils \
+	&& apt-get install -y arping \
+	&& apt-get install -y openssh-client \
+	&& apt-get autoremove \
+	&& apt-get clean \
+	&& mkdir -m 755 /var/lib/vmware-marvin \
 	&& mkdir -m 755 /var/log/mystic \
 	&& mkdir -m 755 /var/lib/vmware-marvin/trust \
 	&& mkdir -m 755 /etc/vmware-marvin \
