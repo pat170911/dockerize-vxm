@@ -2,7 +2,7 @@
 FROM tomcat:8.5.35
 MAINTAINER pat
 
-# create folders
+# install tools and create dependent folders
 RUN apt-get update \
 	&& apt-get install -y net-tools \
 	&& apt-get install -y dnsutils \
@@ -17,11 +17,12 @@ RUN apt-get update \
 	&& mkdir -m 755 /etc/vmware-marvin/ssl
 
 # copy files
-COPY context.xml /usr/local/tomcat/conf/context.xml
-COPY password.key /etc/vmware-marvin
-COPY runtime.properties /var/lib/vmware-marvin
-COPY ./ssl/ /etc/vmware-marvin/ssl
-COPY ./trust/ /var/lib/vmware-marvin/trust
+COPY ./ssl/ 				/etc/vmware-marvin/ssl
+COPY ./trust/ 				/var/lib/vmware-marvin/trust
+COPY context.xml			/usr/local/tomcat/conf/context.xml
+COPY password.key 			/etc/vmware-marvin
+COPY runtime.properties 	/var/lib/vmware-marvin
+COPY config.json 			/var/lib/vmware-marvin
 
 ENV JPDA_ADDRESS 5005
 CMD ["catalina.sh", "jpda", "run"]

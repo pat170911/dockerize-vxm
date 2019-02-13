@@ -4,3 +4,4 @@ tomcat/ssl
 tomcat/trust
 tomcat/password.key
 tomcat/runtime.properties
+tomcat/config.json

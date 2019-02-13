@@ -22,8 +22,9 @@ Visit `http://localhost:8080` for your project.
 DEBUG port: 5005, psql  port: 5432
 
 ## some issues
-If hit some errors about clock or something like that, try to sync your local time with vxm manually. 
+If hit some errors about clock or vc certificate, try to sync your local time with vxm manually. 
 ```sh
-date -s "vxm-date"
-sudo timedatectl set-timezone "vxm-timezone"
+sudo date --set="$(ssh root@192.168.x.x 'date -u')
+#sometimes also need
+sudo timedatectl set-timezone "vxm-timezone(UTC)"
 ```

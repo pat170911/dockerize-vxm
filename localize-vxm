@@ -6,8 +6,15 @@ ip=
 password=
 # the marvin project dir
 path=/home/mystic/workspace && marvin=/marvin
-# dependent package
-dep_pkg=("sshpass")
+# dependent packages
+dep_pkgs=("sshpass")
+# deppendent files in vxm which need to be moved to your local
+dep_vxm_files=("/var/lib/vmware-marvin/trust" \
+  			   "/etc/vmware-marvin/ssl" \
+ 			   "/etc/vmware-marvin/password.key" \
+ 			   "/var/lib/vmware-marvin/runtime.properties" \
+ 			   "/var/lib/vmware-marvin/config.json" \
+ 			   "~/alldump.sql")
 
 error_exit() {
 	echo "Error: $1" 1>&2
@@ -20,12 +27,6 @@ file_exist() {
 	fi
 }
 
-command_status() {
-	if [ "$1" != 0 ];then
-		error_exit "$2"
-	fi
-}
-
 usage() {
 	echo "Usage: $0 [-h host -p password | -i | -h]"
 	echo "       -h --host          IP address of the vxm host"
@@ -33,6 +34,12 @@ usage() {
 	echo "       -i --interactive   Enter the interactive mode"
 	echo "       --help             Show help infomation"
 	exit 1
+}
+
+command_status() {
+	if [ "$1" != 0 ];then
+		error_exit "$2"
+	fi
 }
 
 check_permission() {
@@ -51,7 +58,7 @@ check_ip() {
 }
 
 configure_files() {
-	cp -r ./trust ./ssl password.key runtime.properties ./tomcat && rm -rf ./trust ./ssl password.key runtime.properties
+	cp -r ./trust ./ssl password.key runtime.properties config.json ./tomcat && rm -rf ./trust ./ssl password.key runtime.properties config.json
 	if [ -a ./psql/alldump.sql ]; then
 		cp -r ./psql/alldump.sql ./psql/alldump.sql.bak
 	fi
@@ -102,7 +109,7 @@ apply_patch() {
 }
 
 install_dependency() {
-	for pkg in $dep_pkg; do
+	for pkg in $dep_pkgs; do
 		dpkg -s "$pkg" &> /dev/null
 		if [ "$?" != 0 ]; then
 			echo "install dependent package $pkg..."
@@ -123,11 +130,7 @@ sshpass_mode() {
 	sshpass -p $password ssh root@$ip "pg_dumpall -U postgres > ~/alldump.sql" # may have synchronization problem.
 	sleep 2
 	echo "copy certificate files..."
-	sshpass -p $password scp -r root@$ip:'/var/lib/vmware-marvin/trust \
-						                  /etc/vmware-marvin/ssl \
-					 					  /etc/vmware-marvin/password.key \
-					 					  /var/lib/vmware-marvin/runtime.properties \
-					 					  ~/alldump.sql' .
+	sshpass -p $password scp -r root@$ip:"$dep_vxm_files" .
 	
 	configure_files
 
@@ -152,11 +155,7 @@ interact_mode() {
 	ssh root@$ip "pg_dumpall -U postgres > ~/alldump.sql" # may have synchronization problem.
 
 	echo "copy certificate files, enter vxm password..."
-	scp -r root@$ip:'/var/lib/vmware-marvin/trust \
-					 /etc/vmware-marvin/ssl \
-					 /etc/vmware-marvin/password.key \
-					 /var/lib/vmware-marvin/runtime.properties \
-					 ~/alldump.sql' .
+	scp -r root@$ip:"$dep_vxm_files" .
 	
 	configure_files
 
