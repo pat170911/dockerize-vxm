@@ -1,5 +1,5 @@
 ## dockerize your local vxm
-This project could help to deploy the vxm on your dev vm with docker.
+This util could help to deploy the vxm on your dev vm with docker.
 
 The script `localize_vxm.sh` back up your entire database, copy some necessary files from remote vxm and apply git patch on your dev code to prepare for the dockerization.
 
@@ -18,8 +18,12 @@ docker-compose up
 ```
 
 Visit `http://localhost:8080` for your project.
-
 DEBUG port: 5005, psql  port: 5432
+Log file and database can be accessed by this,
+```sh
+sudo docker exec -it tomcat tail -f /var/log/mystic/web.log
+sudo docker exec -it psql psql -h localhost -p 5432 -U postgres
+```
 
 ## some issues
 If hit some errors about clock or vc certificate, try to sync your local time with vxm manually. 

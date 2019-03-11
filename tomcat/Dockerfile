@@ -8,6 +8,7 @@ RUN apt-get update \
 	&& apt-get install -y dnsutils \
 	&& apt-get install -y arping \
 	&& apt-get install -y openssh-client \
+	&& apt-get install -y vim \
 	&& apt-get autoremove \
 	&& apt-get clean \
 	&& mkdir -m 755 /var/lib/vmware-marvin \

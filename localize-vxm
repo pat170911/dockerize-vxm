@@ -130,7 +130,7 @@ sshpass_mode() {
 	sshpass -p $password ssh root@$ip "pg_dumpall -U postgres > ~/alldump.sql" # may have synchronization problem.
 	sleep 2
 	echo "copy certificate files..."
-	sshpass -p $password scp -r root@$ip:"$dep_vxm_files" .
+	sshpass -p $password scp -r root@$ip:"${dep_vxm_files[*]}" .
 	
 	configure_files
 
@@ -155,7 +155,7 @@ interact_mode() {
 	ssh root@$ip "pg_dumpall -U postgres > ~/alldump.sql" # may have synchronization problem.
 
 	echo "copy certificate files, enter vxm password..."
-	scp -r root@$ip:"$dep_vxm_files" .
+	scp -r root@$ip:"${dep_vxm_files[*]}" .
 	
 	configure_files
 
@@ -200,11 +200,6 @@ while true; do
 	esac
 	shift
 done
-
-#echo "copy pg_nba.conf from dev code..."
-#pg_hba="/marvin/application/mystic.manager/mystic.manager.commons/mystic.manager.commons.db/src/main/resources/conf/pg_hba.conf"
-#file_exist "$path$pg_hba"
-#cp $path$pg_hba ./psql
 
 echo "DONE"
 exit 0

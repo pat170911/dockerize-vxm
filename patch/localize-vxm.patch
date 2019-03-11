@@ -74,19 +74,6 @@ index 50ab420..28d332f 100755
          if (settingsDao.count() == 0) {
              logger.fatal("DB corrupt: no settings found");
              System.exit(1);
-diff --git a/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/LogBundleServiceImpl.java b/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/LogBundleServiceImpl.java
-index 683dbdd..c144b89 100755
---- a/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/LogBundleServiceImpl.java
-+++ b/application/mystic.manager/mystic.manager.web/src/main/java/com/emc/mystic/manager/web/service/LogBundleServiceImpl.java
-@@ -232,7 +232,7 @@ public class LogBundleServiceImpl implements LogBundleService {
-         logger.info("Initialize data collection directory.");
-         File file = new File(DC_PATH);
-         if (!file.exists()) {
--            if (!file.mkdir()) {
-+            if (!file.mkdirs()) {
-                 logger.error("Failed to create data collection directory.");
-                 throw new RuntimeException("Failed to create data collection directory.");
-             }
 diff --git a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml
 index 7da3066..57f7b8e 100644
 --- a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/DBJPAWebContext.xml

@@ -1,23 +1,26 @@
 version: '3'
 services:
     web:
+        container_name: tomcat
         build: ./tomcat
         ports:
             - "8080:8080"
             - "5005:5005"
         depends_on:
-            - psql
-            - rabbitmq
+            - database
+            - message-queue
         links:
-            - psql
-            - rabbitmq
+            - database
+            - message-queue
         volumes:
-            - /expansion/workspace/marvin/application/mystic.manager/mystic.manager.web/target/mystic.manager.web-4.7.100:/usr/local/tomcat/webapps/ROOT
+            - /expansion/workspace/marvin/application/mystic.manager/mystic.manager.web/target/mystic.manager.web-4.7.300:/usr/local/tomcat/webapps/ROOT
             - /etc/localtime:/etc/localtime:ro   
-    psql: 
+    database: 
+        container_name: psql
         build: ./psql
         ports:
             - "5432:5432"
 
-    rabbitmq:
+    message-queue:
+        container_name: rabbitmq
         build: ./rabbitmq
