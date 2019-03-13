@@ -128,6 +128,8 @@ sshpass_mode() {
 
 	echo "backup remote database..."
 	sshpass -p $password ssh root@$ip "pg_dumpall -U postgres > ~/alldump.sql" # may have synchronization problem.
+	command_status "$?" "error occured when ssh to the vxm at the first time."
+
 	sleep 2
 	echo "copy certificate files..."
 	sshpass -p $password scp -r root@$ip:"${dep_vxm_files[*]}" .
@@ -153,6 +155,7 @@ interact_mode() {
 
 	echo "backup remote database, enter vxm password..."
 	ssh root@$ip "pg_dumpall -U postgres > ~/alldump.sql" # may have synchronization problem.
+	command_status "$?" "error occured when ssh to the vxm at the first time."
 
 	echo "copy certificate files, enter vxm password..."
 	scp -r root@$ip:"${dep_vxm_files[*]}" .

@@ -14,6 +14,7 @@ The localize_vxm.sh has implied some patch on your dev code, so make sure to `ma
 Then use the `docker-compse` to build up the env and DONE.
 ```sh
 docker-compose build
+# before up, sometime you need to rebuild your code in IDE to refresh.
 docker-compose up
 ```
 
