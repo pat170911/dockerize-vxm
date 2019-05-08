@@ -121,8 +121,8 @@ diff --git a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-I
 index b57cb58..742eb8a 100755
 --- a/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/webSecurity.xml
 +++ b/application/mystic.manager/mystic.manager.web/src/main/webapp/WEB-INF/webSecurity.xml
-@@ -174,7 +174,7 @@
-         <security:intercept-url pattern="/mystic/events/monitorClusterEvent" access="true" />
+@@ -177,7 +177,7 @@
+         <security:intercept-url pattern="/extension/plugin" access="true" />
          <security:intercept-url pattern="/mystic/**" access="hasAnyRole('VC', 'SDDC')" />
          <!-- <security:intercept-url pattern="/mgmt/ui/**" access="hasAnyRole('VC', 'SDDC')" /> -->
 -        <security:intercept-url pattern="/**" access="true" requires-channel="https"/>
